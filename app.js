@@ -71,27 +71,24 @@ function drawPattern(matrix, pattern, pos) {
   for (let col = 0; col < WIDTH; col++) {
     for (let row = 0; row < HEIGHT; row++) {
       if (pattern == 'Blank') {
-        matrix[row][col] = 1;
-      } else if (pattern == 'Full') {
         matrix[row][col] = 0;
+      } else if (pattern == 'Full') {
+        matrix[row][col] = 1;
       } else if (pattern == 'Checkerboard') {
-        if (row % 2 == 0)
-          matrix[row][col] = col % 2 == 0;
-        else
-          matrix[row][col] = (col+1) % 2 == 0;
+        matrix[row][col] = Number(col % 2 == row % 2);
       } else if (pattern == 'Double Checkerboard') {
         if (row % 4 < 2)
-          matrix[row][col] = (col+2) % 4 < 2;
+          matrix[row][col] = Number((col+2) % 4 < 2);
         else
-          matrix[row][col] = (col) % 4 < 2;
+          matrix[row][col] = Number((col) % 4 < 2);
       } else if (pattern == 'Every 2nd Row') {
-          matrix[row][col] = row % 2 != 0;
+        matrix[row][col] = Number(row % 2 == 1);
       } else if (pattern == 'Every 3rd Row') {
-          matrix[row][col] = row % 3 != 0;
+        matrix[row][col] = Number(row % 3 == 2);
       } else if (pattern == 'Every 2nd Col') {
-          matrix[row][col] = col % 2 != 0;
+        matrix[row][col] = Number(col % 2 == 1);
       } else if (pattern == 'Every 3rd Col') {
-          matrix[row][col] = col % 3 != 0;
+        matrix[row][col] = Number(col % 3 == 2);
       }
     }
   }
@@ -102,10 +99,10 @@ function updateMatrix(matrix, pos) {
   for (let col = 0; col < WIDTH; col++) {
     for (let row = 0; row < HEIGHT; row++) {
       let foo = $(`#${pos}-${row}-${col}`);
-      if (matrix[row][col]) {
-        foo.removeClass('off');
-      } else {
+      if (matrix[row][col] > 0) {
         foo.addClass('off');
+      } else {
+        foo.removeClass('off');
       }
     }
   }
@@ -237,7 +234,7 @@ function prepareValsForDrawingLeft() {
   for (let col = 0; col < width; col++) {
     for (let row = 0; row < height; row++) {
       const cell = matrix_left[row][col];
-      if (cell == 0) {
+      if (cell > 0) {
         const i = col + row * width;
         vals[Math.trunc(i/8)] |= 1 << i % 8;
       }
@@ -255,7 +252,7 @@ function prepareValsForDrawingRight() {
   for (let col = 0; col < width; col++) {
     for (let row = 0; row < height; row++) {
       const cell = matrix_right[row][col];
-      if (cell == 0) {
+      if (cell > 0) {
         const i = col + row * width;
         vals[Math.trunc(i/8)] |= 1 << i % 8;
       }
@@ -327,11 +324,11 @@ function toggleLeft(e) {
 	var y = $(this).data('j');
 
 	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_left[x][y] = 0;
+		matrix_left[x][y] = 1;
 		$(this).addClass('off');
 	}
 	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
-		matrix_left[x][y] = 1;
+		matrix_left[x][y] = 0;
 		$(this).removeClass('off');
 	}
 
@@ -345,11 +342,11 @@ function toggleRight(e) {
 	var y = $(this).data('j');
 
 	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_right[x][y] = 0;
+		matrix_right[x][y] = 1;
 		$(this).addClass('off');
 	}
 	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
-		matrix_right[x][y] = 1;
+		matrix_right[x][y] = 0;
 		$(this).removeClass('off');
 	}
 
