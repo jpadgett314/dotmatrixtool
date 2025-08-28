@@ -94,6 +94,11 @@ strong {
   height: 9px;
   width: auto;
 }
+#penBrightness {
+  display: inline;
+  height: 9px;
+  width: auto;
+}
 .slider-wrapper {
   margin-top: 10px;
 }
@@ -223,7 +228,7 @@ strong {
 }
 
 .led-grid table tr td {
-  background-color: #a9a9a9;
+  background-color: #a0a0a0;
   padding: 10px;
 }
 

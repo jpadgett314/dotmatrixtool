@@ -31,6 +31,8 @@ const PATTERNS = [
   'Every 3rd Row',
   'Every 2nd Col',
   'Every 3rd Col',
+  'Logo Left',
+  'Logo Right',
 ];
 
 var matrix_left;
@@ -39,9 +41,107 @@ var $table_left;
 var $table_right;
 var rowMajor = false;
 var msbendian = false;
+var penBrightness = 1.0;
 let portLeft = null;
 let portRight = null;
 let swap = false;
+
+const GAMMA_CORRECTION = [
+  0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 
+  2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 
+  4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 
+  8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 
+  13, 14, 14, 14, 15, 15, 16, 16, 17, 17, 17, 18, 18, 
+  19, 19, 20, 20, 21, 22, 22, 23, 23, 24, 24, 25, 26, 
+  26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 34, 
+  35, 36, 37, 38, 38, 39, 40, 41, 42, 42, 43, 44, 45, 
+  46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 
+  59, 60, 61, 62, 63, 64, 66, 67, 68, 69, 70, 71, 73, 
+  74, 75, 76, 78, 79, 80, 82, 83, 84, 86, 87, 88, 90, 
+  91, 93, 94, 96, 97, 99, 100, 102, 103, 105, 106, 108, 
+  110, 111, 113, 115, 116, 118, 120, 121, 123, 125, 127, 
+  128, 130, 132, 134, 136, 138, 140, 141, 143, 145, 147, 
+  149, 151, 153, 155, 157, 159, 161, 164, 166, 168, 170, 
+  172, 174, 177, 179, 181, 183, 186, 188, 190, 193, 195, 
+  197, 200, 202, 205, 207, 210, 212, 215, 217, 220, 222, 
+  225, 228, 230, 233, 236, 238, 241, 244, 247, 249, 252,
+  255 
+];
+
+const LOGO_LEFT = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0.6, 1, 1, 0.17, 0],
+  [0, 0, 0, 0.6, 1, 1, 1, 1, 1],
+  [0, 0, 0.33, 1, 1, 1, 1, 1, 1],
+  [0, 0, 0.33, 1, 1, 1, 1, 1, 0],
+  [0, 0, 0.49, 1, 1, 1, 0.17, 0, 0],
+  [0, 0.17, 0.69, 1, 1, 0.17, 0, 0, 0],
+  [0, 1, 1, 1, 0.41, 0, 0, 0, 0],
+  [1, 1, 1, 1, 0.17, 0, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0, 0, 0],
+  [1, 1, 1, 1, 0.17, 0, 0, 0, 0],
+  [0.17, 1, 1, 1, 0.4, 0, 0, 0, 0],
+  [0, 0.17, 0.61, 1, 1, 0.17, 0, 0, 0],
+  [0, 0, 0.4, 1, 1, 1, 0.17, 0, 0],
+  [0, 0, 0.47, 1, 1, 1, 1, 1, 0],
+  [0, 0, 0.47, 0.98, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0.6, 0.98, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0.6, 0.57, 1, 0.4, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+]
+
+const LOGO_RIGHT = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0.17, 1, 1, 0.6, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 0.6, 0, 0, 0],
+  [1, 1, 1, 1, 1, 1, 0.33, 0, 0],
+  [0, 1, 1, 1, 1, 1, 0.33, 0, 0],
+  [0, 0, 0.17, 1, 1, 1, 0.49, 0, 0],
+  [0, 0, 0, 0.17, 1, 1, 0.69, 0.17, 0],
+  [0, 0, 0, 0, 0.41, 1, 1, 1, 0],
+  [0, 0, 0, 0, 0.17, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0.17, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0.41, 1, 1, 1, 0],
+  [0, 0, 0, 0.17, 1, 1, 0.61, 0, 0],
+  [0, 0, 0.17, 1, 1, 1, 0.47, 0, 0],
+  [0, 1, 1, 1, 1, 1, 0.47, 0, 0],
+  [1, 1, 1, 1, 1, 0.87, 0.39, 0, 0],
+  [1, 1, 1, 1, 1, 0.6, 0, 0, 0],
+  [0, 0.4, 0.57, 1, 0.6, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+]
 
 $(function() {
   matrix_left = createArray(34, 9);
@@ -89,6 +189,10 @@ function drawPattern(matrix, pattern, pos) {
         matrix[row][col] = Number(col % 2 == 1);
       } else if (pattern == 'Every 3rd Col') {
         matrix[row][col] = Number(col % 3 == 2);
+      } else if (pattern == 'Logo Left') {
+        matrix[row][col] = LOGO_LEFT[row][col];
+      } else if (pattern == 'Logo Right') {
+        matrix[row][col] = LOGO_RIGHT[row][col];
       }
     }
   }
@@ -170,24 +274,12 @@ function initOptions() {
   //$('#brightnessRange').change(function() {
     let brightness = $(this).val();
     //console.log("Brightness:", brightness);
-    command(portLeft, BRIGHTNESS_CMD, brightness);
-    command(portRight, BRIGHTNESS_CMD, brightness);
+    sendCommand(portLeft, BRIGHTNESS_CMD, brightness);
+    sendCommand(portRight, BRIGHTNESS_CMD, brightness);
   });
-}
-
-async function command(port, id, params) {
-  const writer = port.writable.getWriter();
-
-  let bytes = [0x32, 0xAC];
-  bytes = bytes.concat([id]);
-  bytes = bytes.concat(params);
-  console.log('Params:', bytes);
-
-  const data = new Uint8Array(bytes);
-  await writer.write(data);
-
-  // Allow the serial port to be closed later.
-  writer.releaseLock();
+  $(document).on('input change', '#penBrightness', function() {
+    penBrightness = $(this).val();
+  });
 }
 
 async function checkFirmwareVersion(port, side) {
@@ -204,6 +296,7 @@ async function checkFirmwareVersion(port, side) {
 
   const data = new Uint8Array(bytes);
   await writer.write(data);
+  await writer.close();
   // Allow the serial port to be closed later.
   writer.releaseLock();
 
@@ -225,43 +318,6 @@ async function checkFirmwareVersion(port, side) {
   reader.releaseLock();
 }
 
-function prepareValsForDrawingLeft() {
-	const width = matrix_left[0].length;
-	const height = matrix_left.length;
-
-  let vals = new Array(39).fill(0);
-
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      const cell = matrix_left[row][col];
-      if (cell > 0) {
-        const i = col + row * width;
-        vals[Math.trunc(i/8)] |= 1 << i % 8;
-      }
-    }
-  }
-  return vals;
-}
-
-function prepareValsForDrawingRight() {
-	const width = matrix_right[0].length;
-	const height = matrix_right.length;
-
-  let vals = new Array(39).fill(0);
-
-  for (let col = 0; col < width; col++) {
-    for (let row = 0; row < height; row++) {
-      const cell = matrix_right[row][col];
-      if (cell > 0) {
-        const i = col + row * width;
-        vals[Math.trunc(i/8)] |= 1 << i % 8;
-      }
-    }
-  }
-  return vals;
-}
-
-
 async function sendToDisplay(recurse) {
     await sendToDisplayLeft(recurse);
     await sendToDisplayRight(recurse);
@@ -269,24 +325,49 @@ async function sendToDisplay(recurse) {
 
 async function sendToDisplayLeft(recurse) {
   if (portLeft === null) return;
-
-  let vals = prepareValsForDrawingLeft();
-  if (swap) {
-    console.log('swapped left to right');
-    vals = prepareValsForDrawingRight();
+	
+  const width = matrix_left[0].length;
+  for (let col = 0; col < width; col++) {
+    await sendColumnToDisplayLeft(col);
   }
-  console.log("Send bytes left:", vals);
-  await command(portLeft, DRAW_CMD, vals);
+
+  console.log('flush buffers left');
+  await sendCommand(portLeft, DrawGreyColBuffer, []);
 }
+
 async function sendToDisplayRight(recurse) {
   if (portRight === null) return;
-  let vals = prepareValsForDrawingRight();
-  if (swap) {
-    console.log('swapped right to left');
-    vals = prepareValsForDrawingLeft();
+	
+  const width = matrix_right[0].length;
+  for (let col = 0; col < width; col++) {
+    await sendColumnToDisplayRight(col);
   }
-  console.log("Send bytes right:", vals);
-  await command(portRight, DRAW_CMD, vals);
+
+  await sendCommand(portRight, DrawGreyColBuffer, []);
+}
+
+async function sendColumnToDisplayRight(columnIndex) {
+  if (portRight === null) return;
+  let column = getColumnBytes(matrix_right, columnIndex);
+  let params = [columnIndex].concat(column);
+
+  // console.log(`Send column ${columnIndex} bytes right:`, params);
+  await sendCommand(portRight, STAGE_GREY_COL_CMD, params);
+  await new Promise(r => setTimeout(r, 10));
+}
+
+async function sendColumnToDisplayLeft(columnIndex) {
+  if (portLeft === null) return;
+  let column = getColumnBytes(matrix_left, columnIndex);
+  let params = [columnIndex].concat(column);
+
+  // console.log(`Send column ${columnIndex} bytes left:`, params);
+  await sendCommand(portLeft, STAGE_GREY_COL_CMD, params);
+  await new Promise(r => setTimeout(r, 10));
+}
+
+function getColumnBytes(matrix, columnIndex) {
+  return matrix.map(row => GAMMA_CORRECTION[Math.floor((row[columnIndex] ?? 0) * 255)]);
 }
 
 async function connectSerialLeft() {
@@ -324,7 +405,7 @@ function toggleLeft(e) {
 	var y = $(this).data('j');
 
 	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_left[x][y] = 1;
+		matrix_left[x][y] = penBrightness;
 		$(this).addClass('off');
 	}
 	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
@@ -332,7 +413,7 @@ function toggleLeft(e) {
 		$(this).removeClass('off');
 	}
 
-  sendToDisplay(true);
+  sendToDisplayLeft(true);
 
 	return false;
 }
@@ -342,7 +423,7 @@ function toggleRight(e) {
 	var y = $(this).data('j');
 
 	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_right[x][y] = 1;
+		matrix_right[x][y] = penBrightness;
 		$(this).addClass('off');
 	}
 	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
@@ -350,7 +431,7 @@ function toggleRight(e) {
 		$(this).removeClass('off');
 	}
 
-  sendToDisplay(true);
+  sendToDisplayRight(true);
 
 	return false;
 }
@@ -384,11 +465,11 @@ function createArray(length) {
 }
 
 async function wake(port, wake) {
-  await sendCommand(port, 0x03, [wake ? 0 : 1]);
+  await sendCommand(port, SLEEP_CMD, [wake ? 0 : 1]);
 }
 
 async function bootloader(port) {
-  await sendCommand(port, 0x02, [0]);
+  await sendCommand(port, BOOTLOADER_CMD, [0]);
 }
 
 async function sendCommand(port, commandId, params) {
@@ -403,6 +484,7 @@ async function sendCommand(port, commandId, params) {
 
   const data = new Uint8Array(bytes);
   await writer.write(data);
+  await writer.close();
   // Allow the serial port to be closed later.
   writer.releaseLock();
 }
