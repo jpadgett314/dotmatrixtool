@@ -204,8 +204,11 @@ function updateMatrix(matrix, pos) {
     for (let row = 0; row < HEIGHT; row++) {
       let foo = $(`#${pos}-${row}-${col}`);
       if (matrix[row][col] > 0) {
+        let border_px = Math.min(8, 10 * (1.0 - matrix[row][col]));
+        foo.css("box-shadow", `inset 0 0 0 ${border_px}px #a0a0a0`);
         foo.addClass('off');
       } else {
+        foo.css("box-shadow", `inset 0 0 0 0px black`);
         foo.removeClass('off');
       }
     }
@@ -213,63 +216,63 @@ function updateMatrix(matrix, pos) {
 }
 
 function updateTableLeft() {
-	var width = matrix_left[0].length;
-	var height = matrix_left.length;
+  var width = matrix_left[0].length;
+  var height = matrix_left.length;
 
   $table_left = populateTable(null, height, width, "left");
-	$('#led-grid_left').html('');
-	$('#led-grid_left').append($table_left);
+  $('#led-grid_left').html('');
+  $('#led-grid_left').append($table_left);
 
-	// events
-	$table_left.on("mousedown", "td", toggleLeft);
-    $table_left.on("mouseenter", "td", toggleLeft);
-    $table_left.on("dragstart", function() { return false; });
+  // events
+  $table_left.on("mousedown", "td", toggleLeft);
+  $table_left.on("mouseenter", "td", toggleLeft);
+  $table_left.on("dragstart", function() { return false; });
 }
 
 function updateTableRight() {
-	var width = matrix_right[0].length;
-	var height = matrix_right.length;
+  var width = matrix_right[0].length;
+  var height = matrix_right.length;
 
   $table_right = populateTable(null, height, width, "right");
-	$('#led-grid_right').html('');
-	$('#led-grid_right').append($table_right);
+  $('#led-grid_right').html('');
+  $('#led-grid_right').append($table_right);
 
-	// events
-	$table_right.on("mousedown", "td", toggleRight);
+  // events
+  $table_right.on("mousedown", "td", toggleRight);
   $table_right.on("mouseenter", "td", toggleRight);
   $table_right.on("dragstart", function() { return false; });
 }
 
 function initOptions() {
-	$('#clearLeftBtn').click(function() {
+  $('#clearLeftBtn').click(function() {
     matrix_left = createArray(matrix_left.length, matrix_left[0].length);
     updateTableLeft();
     sendToDisplay(true);
   });
-	$('#wakeBtn').click(function() {
+  $('#wakeBtn').click(function() {
     wake(portLeft, true);
     wake(portRight, true);
   });
-	$('#sleepBtn').click(function() {
+  $('#sleepBtn').click(function() {
     wake(portLeft, false);
     wake(portRight, false);
   });
-	$('#bootloaderBtn').click(function() {
+  $('#bootloaderBtn').click(function() {
     bootloader(portLeft);
     bootloader(portRight);
   });
-	$('#clearRightBtn').click(function() {
+  $('#clearRightBtn').click(function() {
     matrix_right = createArray(matrix_right.length, matrix_right[0].length);
     updateTableRight();
     sendToDisplay(true);
   });
-	$('#connectLeftBtn').click(connectSerialLeft);
-	$('#connectRightBtn').click(connectSerialRight);
-	$('#swapBtn').click(async function() {
+  $('#connectLeftBtn').click(connectSerialLeft);
+  $('#connectRightBtn').click(connectSerialRight);
+  $('#swapBtn').click(async function() {
     swap = !swap;
     await sendToDisplay(true);
   });
-	//$('#sendButton').click(sendToDisplay);
+  //$('#sendButton').click(sendToDisplay);
   $(document).on('input change', '#brightnessRange', function() {
   //$('#brightnessRange').change(function() {
     let brightness = $(this).val();
@@ -325,7 +328,7 @@ async function sendToDisplay(recurse) {
 
 async function sendToDisplayLeft(recurse) {
   if (portLeft === null) return;
-	
+  
   const width = matrix_left[0].length;
   for (let col = 0; col < width; col++) {
     await sendColumnToDisplayLeft(col);
@@ -337,7 +340,7 @@ async function sendToDisplayLeft(recurse) {
 
 async function sendToDisplayRight(recurse) {
   if (portRight === null) return;
-	
+  
   const width = matrix_right[0].length;
   for (let col = 0; col < width; col++) {
     await sendColumnToDisplayRight(col);
@@ -401,39 +404,45 @@ async function connectSerialRight() {
 }
 
 function toggleLeft(e) {
-	var x = $(this).data('i');
-	var y = $(this).data('j');
+  var x = $(this).data('i');
+  var y = $(this).data('j');
 
-	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_left[x][y] = penBrightness;
-		$(this).addClass('off');
-	}
-	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
-		matrix_left[x][y] = 0;
-		$(this).removeClass('off');
-	}
+  if (e.buttons == 1 && !e.ctrlKey) {
+    matrix_left[x][y] = penBrightness;
+    let border_px = Math.min(8, 10 * (1.0 - penBrightness));
+    $(this).css("box-shadow", `inset 0 0 0 ${border_px}px #a0a0a0`);
+    $(this).addClass('off');
+  }
+  else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
+    matrix_left[x][y] = 0;
+    $(this).css("box-shadow", `inset 0 0 0 0px black`);
+    $(this).removeClass('off');
+  }
 
   sendToDisplayLeft(true);
 
-	return false;
+  return false;
 }
 
 function toggleRight(e) {
-	var x = $(this).data('i');
-	var y = $(this).data('j');
+  var x = $(this).data('i');
+  var y = $(this).data('j');
 
-	if (e.buttons == 1 && !e.ctrlKey) {
-		matrix_right[x][y] = penBrightness;
-		$(this).addClass('off');
-	}
-	else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
-		matrix_right[x][y] = 0;
-		$(this).removeClass('off');
-	}
+  if (e.buttons == 1 && !e.ctrlKey) {
+    matrix_right[x][y] = penBrightness;
+    let border_px = Math.min(8, 10 * (1.0 - penBrightness));
+    $(this).css("box-shadow", `inset 0 0 0 ${border_px}px #a0a0a0`);
+    $(this).addClass('off');
+  }
+  else if (e.buttons == 2 || (e.buttons == 1 && e.ctrlKey)) {
+    matrix_right[x][y] = 0;
+    $(this).css("box-shadow", `inset 0 0 0 0px black`);
+    $(this).removeClass('off');
+  }
 
   sendToDisplayRight(true);
 
-	return false;
+  return false;
 }
 
 function populateTable(table, rows, cells, pos) {
