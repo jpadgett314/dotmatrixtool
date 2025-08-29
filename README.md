@@ -1,21 +1,15 @@
 # Framework Laptop 16 LED Matrix Input Module Control
 
-[View it in your browser.](https://ledmatrix.frame.work)
+[View it in your browser.](https://jpadgett314.github.io/dotmatrixtool/)
 
-This little web app can directly connect to the Framework Laptop 16 LED matrix
-Input Module. You need to be running a browser based on Chrome (Edge, Chromium,
-Opera, etc.).
+⚠️ You need to be running a browser based on Chrome (Edge, Chromium, Opera, etc.) ⚠️
 
-To start, simply open `index.html`. There is no server to run. If you want, you
-can boot a simple web server with Python: `python3 -m http.server`
+This is forked from forked from [FrameworkComputer/dotmatrixtool](https://github.com/FrameworkComputer/dotmatrixtool).
 
-Use the "Connect Left" and "Connect Right" buttons to connect to each
-respective Input Module. Draw on each LED matrix in the web browser, and it
-will automatically update on your physical device.
+Notable features unique to this fork include: 
 
-Click and drag to draw, CTRL + click to erase.
-
-Brightness can also be adjusted using the slider.
+- Non-binary (grayscale) matrix modifications 
+- Framework logo pattern preset
 
 ## More Information
 
@@ -25,7 +19,7 @@ Brightness can also be adjusted using the slider.
 
 ## Dot Matrix Tool
 
-This repository is based on code from https://github.com/stefangordon/dotmatrixtool.
+LED Matrix Input Module Control is based on code from https://github.com/stefangordon/dotmatrixtool.
 See also http://dotmatrixtool.com
 
 ## Hosting
